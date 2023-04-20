@@ -1,4 +1,4 @@
-import { Drawer, Container, List, ListItem } from '@mui/material';
+import { Drawer, Container, List, ListItem, useTheme, ListItemButton, ListItemText, Toolbar, Divider, AppBar, InputBase, Paper } from '@mui/material';
 
 interface SideMenuProps {
     children: React.ReactNode;
@@ -8,8 +8,10 @@ const drawerWidth = 300;
 
 
 const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
+    const theme = useTheme();
+
     return(
-        <main className='flex w-[100vw]'>
+        <main className='grid grid-cols-[300px_auto]'>
             <Drawer
                 sx={{ 
                     width: drawerWidth,
@@ -17,31 +19,67 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                     '& .MuiDrawer-paper': {
                       width: drawerWidth,
                       boxSizing: 'border-box',
+                      background: '#333333',
+                      color: 'white'
                     },
                 }}
                 open={true}
                 anchor='left'
                 variant='persistent'
             >
-                <div>
+                <Toolbar>
                     <h1>Drug Prescription</h1>
-                </div>
+                </Toolbar>
+                <Divider/>
                 <List>
                     <ListItem>
-                        Home
+                        <ListItemButton>
+                            
+                            <ListItemText>
+                                Home
+                            </ListItemText>
+                        </ListItemButton>
                     </ListItem>
+
                     <ListItem>
-                        Patients
+                        <ListItemButton>
+                            
+                            <ListItemText>
+                                Patients
+                            </ListItemText>
+                        </ListItemButton>
                     </ListItem>
+
                     <ListItem>
-                        Drugs
+                        <ListItemButton>
+                            
+                            <ListItemText>
+                                Drugs
+                            </ListItemText>
+                        </ListItemButton>
                     </ListItem>
+
+
+                    
                 </List>
 
             </Drawer>
-            <Container
-                sx={{ marginLeft: `${drawerWidth}px` }}
-            >
+            <Container sx={{ position: 'relative' }}>
+                <AppBar 
+                    sx={{
+                    left: 0,
+                    right: 0
+                    }} 
+                    position="absolute"
+                >
+                    <Toolbar>
+                        <Paper>
+
+                            <InputBase placeholder="Search for a user"/>
+                        </Paper>
+                    </Toolbar>
+                </AppBar>
+
                 {children}
             </Container>
         </main>
