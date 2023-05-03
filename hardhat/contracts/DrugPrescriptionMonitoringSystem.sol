@@ -25,10 +25,10 @@ contract DrugPrescriptionMonitoringSystem {
 
     struct Prescription {
         uint id;
+        uint issued_by;
         string method_of_payment;
         uint256 date_issued;
         Drug drug;
-        Pharmacy pharmacy;
     }
 
     struct Patient {
@@ -39,7 +39,11 @@ contract DrugPrescriptionMonitoringSystem {
         string phone_number;
         uint256 date_of_birth;
         Prescription[] prescriptions;
-        Pharmacy pharmacy;
+    }
+
+    struct PatientStorage {
+        uint id;
+        string name;
     }
 
     struct Delegate {
@@ -63,11 +67,16 @@ contract DrugPrescriptionMonitoringSystem {
         Delegate[] delegates;
     }
 
+    struct PrescriberStorage {
+        uint id;
+        string name;
+    }
+
     mapping (uint => Prescriber) public prescribers;
-    uint[] prescriberIds;
+    PrescriberStorage[] prescriberStore;
 
     mapping (uint => Patient) public patients;
-    uint[] patientIds;
+    PatientStorage[] public patientStore;
 
     Drug[] drugs;
     Pharmacy[] pharmacies;
@@ -150,21 +159,18 @@ contract DrugPrescriptionMonitoringSystem {
         newPatient.phone_number = phone_number;
         newPatient.date_of_birth = date_of_birth;
         
-        patientIds.push(id);
+        patientStore.push(PatientStorage(id, name));
         emit CreatedPatient(name, nin, gender, phone_number, date_of_birth);
     }
 
-    function GetPatients() public view returns (Patient[] memory){
-        Patient[] memory allPatients = new Patient[](patientIds.length);
-        for(uint i = 0; i < patientIds.length; i++) {
+    function GetAllPatients() public view returns (Patient[] memory){
+        Patient[] memory allPatients = new Patient[](patientStore.length);
+        for(uint i = 0; i < patientStore.length; i++) {
             allPatients[i] = patients[i];  
         }
         return allPatients;
     }
 
-    function GetPatientByName(string memory name) public view returns(Patient memory) {
-
-    }
 
     //Functions for Creating and Getting Prescribers
     function AddPrescriber (
@@ -193,6 +199,16 @@ contract DrugPrescriptionMonitoringSystem {
         prescribers[id].verified = true;
     }
 
+    function GetAllPrescribers () public view returns (Prescriber[] memory){
+        Prescriber[] memory allPrescribers = new Prescriber[](prescriberStore.length);
+        for(uint i = 0; i < prescriberStore.length; i++) {
+            allPrescribers[i] = prescribers[i];  
+        }
+        return allPrescribers;
+    }
+
+
+    //Functions to Manage Delegates of Prescribers
     function AddDelegate(
         uint _prescriber_id,
         uint _id,
@@ -206,29 +222,40 @@ contract DrugPrescriptionMonitoringSystem {
         prescribers[_prescriber_id].delegates.push(newDelegate);
     }
 
+    function RemoveDelegate(
+        uint _prescriber_id,
+        uint _delegate_index_in_array
+    ) public returns(Delegate[] memory) {
+        //Some Code
+        Delegate[] storage delegates = prescribers[_prescriber_id].delegates;
+        delegates[_delegate_index_in_array] = delegates[delegates.length -1];
+        delegates.pop();
+        return delegates;
+    }
+
+
+    //Functions to Add Prescription
     function AddPrescription (
         uint _user_id,
 
         uint _id, 
         string memory _method_of_payment,
         uint _date_issued,
+        uint _issued_by,
 
         uint _drug_id,
         string memory _drug_name,
-        string memory _manufacturer,
+        string memory _manufacturer
 
-        uint _pharmacy_id,
-        string memory _pharmacy_name,
-        string memory _location,
-        string[] memory _contact_info
     ) public {
-        Pharmacy memory pharmacy = Pharmacy(_pharmacy_id, _pharmacy_name, _location, _contact_info);
         Drug memory drug = Drug(_drug_id, _drug_name, _manufacturer);
+        Prescription memory newPrescription = Prescription(_id, _issued_by, _method_of_payment, _date_issued, drug);
 
-        Prescription memory newPrescription = Prescription(_id, _method_of_payment, _date_issued, drug, pharmacy);
         patients[_user_id].prescriptions.push(newPrescription);
+        /*
+        patients[_user_id].prescriptions.push(newPrescription);*/
 
-        emit AddedPatientPrescription(patients[_user_id], pharmacy, drug);
+        //emit AddedPatientPrescription(patients[_user_id], pharmacy, drug);
     }
 
 
