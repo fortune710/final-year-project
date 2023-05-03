@@ -2,7 +2,8 @@ import { AppBar, Box, InputBase, Paper, Table, TableBody, TableCell, TableContai
 import { NextPage } from "next";
 import { PrescriptionData } from "@/mock/presciption";
 import SideMenu from "@/components/SideMenu";
-import { FormEvent, useEffect } from "react";
+import Modal from "@/components/Modal";
+import { FormEvent, useEffect, useState } from "react";
 import  { ethers } from "ethers";
 
 import Contract from '../hardhat/artifacts/contracts/DrugPrescriptionSystem.sol/DrugPrescriptionSystem.json';
@@ -17,6 +18,8 @@ const HomePage: NextPage = () => {
     const users = await contract.users(200)
     console.log(users)
   }
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     getUser();
@@ -39,7 +42,7 @@ const HomePage: NextPage = () => {
     <SideMenu
       children={
         <main className="relative">
-          <Box>
+          <Box marginTop={10}>
             <h1>Recent Prescriptions Issued</h1>
             <TableContainer sx={{ maxHeight: 400 }} component={Paper}>
               <Table>
@@ -66,34 +69,18 @@ const HomePage: NextPage = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-
-            <form onSubmit={addUser}>
-              <input 
-                placeholder="ID" 
-                type="number" 
-                name="id"
-              />
-
-              <input
-                placeholder="email"
-                type="email"
-                name="email"
-              />
-              <input
-                placeholder="password"
-                type="password"
-                name="password"
-              />
-              <input
-                placeholder="name"
-                name="name"
-              
-              />
-
-
-              <button>Submit</button>
-            </form>
           </Box>
+
+          <Modal open={modalOpen}>
+              <TextField
+                  focused={true}
+                  sx={{ "::placeholder": "#fff" }}
+                  variant="outlined"
+                  label="Full Name"
+                  name="full_name"
+                  placeholder="Enter Patient's Full Name"
+              />
+          </Modal>
         </main>
       }
     />
