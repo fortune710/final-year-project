@@ -20,6 +20,8 @@ import {
     InputLabel,
     FormControl,
     FormLabel,
+    Button,
+    CircularProgress,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { 
@@ -36,8 +38,9 @@ import {
 } from "@mui/icons-material";
 import usePatients from '@/hooks/usePatients';
 import Link from 'next/link';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import Modal from './Modal';
+import { PatientData } from '@/types';
 
 interface SideMenuProps {
     children: React.ReactNode;
@@ -48,10 +51,11 @@ const drawerWidth = 300;
 
 const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
     const theme = useTheme();
-    const { searchUser } = usePatients();
+    const { searchUser, addPatientToBlockchain, addPatientMutationLoading } = usePatients();
 
     const [patients, setPatients] = useState<any[]|undefined>(undefined);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [dateofBirth, setDateofBirth] = useState<string>('');
 
     const handleSearch = (query:string) => {
         if (!query) {
@@ -60,6 +64,22 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
 
         const patients = searchUser(query);
         return setPatients(patients!);
+    }
+
+    const handleSubmit = async (e:FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const fields  = new FormData(e.target as HTMLFormElement);
+        const formData = Object.fromEntries(fields);
+        
+        const res = await addPatientToBlockchain({
+            name: formData.name as string,
+            date_of_birth: new Date(dateofBirth).valueOf(),
+            nin: formData.nin as string,
+            gender: formData.gender as 'M'|'F',
+            phone_number: formData.phone_number as string,
+        } as PatientData)
+
+        alert(res)
     }
 
     //Style objects for MUI components
@@ -140,7 +160,10 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                         <Box sx={{ position: 'relative', width: '40%' }}>
                             <Paper sx={{ boxShadow: 0, padding: 1, width: '100%', display:'flex', alignItems: 'center' }}>
                                 <SearchOutlined sx={{ marginRight: '10px' }}/>
-                                <InputBase onChange={(e) => handleSearch(e.target.value)} placeholder="Search for a user"/>
+                                <InputBase 
+                                    onChange={(e) => handleSearch(e.target.value)} 
+                                    placeholder="Search for a user"
+                                />
                             </Paper>
                             {
                                 !patients ? null :
@@ -161,7 +184,15 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                                     <List>
                                     {
                                         patients.map((patient) => (
-                                            <ListItem>{patient.name}</ListItem>
+                                            <ListItemButton 
+                                                key={patient.id}
+                                                LinkComponent={Link}
+                                                href={`/patients/${patient.id}`}
+                                            >
+                                                <ListItemText>
+                                                    {patient.name}
+                                                </ListItemText>
+                                            </ListItemButton>
                                         ))
                                     }
                                     </List>
@@ -173,14 +204,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
 
                 {children}
                 <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-                    <Box width="80%" display="flex" flexDirection="column">
-
+                    <form onSubmit={handleSubmit} style={{ width: '80%', display: 'flex', flexDirection: 'column' }}>
                         <TextField
                             margin="normal"
                             sx={{ "::placeholder": "#fff" }}
                             variant="outlined"
                             label="Full Name"
-                            name="full_name"
+                            name="name"
                             placeholder="Enter Patient's Full Name"
                         />
 
@@ -206,24 +236,39 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                         <DatePicker 
                             sx={{ marginVerical: 5 }}
                             label="Date of Birth"
+                            onChange={(newDate) => setDateofBirth(newDate as string)}
                         />
 
                         <Container>
                             <InputLabel>Gender</InputLabel>
-                            <RadioGroup>
+                            <RadioGroup name='gender' sx={{ display: 'flex' }}>
                                 <Box display="flex" alignItems="center">
-                                    <Radio value={"male"}/>
+                                    <Radio name='gender' value={"M"}/>
                                     <InputLabel>Male</InputLabel>
                                 </Box>
 
                                 <Box display="flex" alignItems="center">
-                                    <Radio value={"female"}/>
+                                    <Radio name='gender' value={"F"}/>
                                     <InputLabel>Female</InputLabel>
                                 </Box>
                             </RadioGroup>
                         </Container>
                         
-                    </Box>
+                        <Button 
+                            disabled={addPatientMutationLoading} 
+                            type='submit'
+                            variant='contained'
+                            disableElevation
+                            color="primary"
+                            
+                        >
+                            { 
+                                addPatientMutationLoading ? 
+                                <CircularProgress sx={{ color: "#fff" }}/> 
+                                : 'Add Patient'
+                            }
+                        </Button>
+                    </form>
                 </Modal>
             </Container>
         </main>
