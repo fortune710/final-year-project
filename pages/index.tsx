@@ -5,26 +5,24 @@ import SideMenu from "@/components/SideMenu";
 import Modal from "@/components/Modal";
 import { FormEvent, useEffect, useState } from "react";
 import  { ethers } from "ethers";
+import usePatients from "@/hooks/usePatients";
 
-import Contract from '../hardhat/artifacts/contracts/DrugPrescriptionSystem.sol/DrugPrescriptionSystem.json';
 
+/*
 const CONTRACT_ADDRESS = "0x5db157bC5D6d911c7aF90E9469260b81195352d1";
 const provider = new ethers.EtherscanProvider("sepolia", "HXHC8CZC3NV6TIXW6FTJD9MRFSSPZ7DT43");
 const wallet = new ethers.Wallet("8d329f4186655cc0867acbe970d83f51fb9bbed5440575af2a4398b4b898fb4e", provider)
 const contract = new ethers.Contract(CONTRACT_ADDRESS, Contract.abi, wallet);
+*/
 
 const HomePage: NextPage = () => {
-  async function getUser() {
-    const users = await contract.users(200)
-    console.log(users)
-  }
+  
 
   const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    getUser();
-  }, [])
+  const patients = usePatients();
 
+  /*
   async function addUser(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fields = new FormData(e.target as HTMLFormElement)
@@ -36,7 +34,7 @@ const HomePage: NextPage = () => {
 
     const newUser = await contract.users(data.id)
     console.log(newUser)
-  }
+  }*/
 
   return (
     <SideMenu
