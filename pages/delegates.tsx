@@ -76,7 +76,7 @@ const DelegatesPage: NextPage = () => {
 
                         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                             <Box width="80%" display="flex" flexDirection="column">
-
+                                <h1>Add Delegate</h1>
                                 <TextField
                                     margin="normal"
                                     sx={{ "::placeholder": "#fff" }}

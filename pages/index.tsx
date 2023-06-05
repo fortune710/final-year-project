@@ -8,13 +8,6 @@ import  { ethers } from "ethers";
 import usePatients from "@/hooks/usePatients";
 
 
-/*
-const CONTRACT_ADDRESS = "0x5db157bC5D6d911c7aF90E9469260b81195352d1";
-const provider = new ethers.EtherscanProvider("sepolia", "HXHC8CZC3NV6TIXW6FTJD9MRFSSPZ7DT43");
-const wallet = new ethers.Wallet("8d329f4186655cc0867acbe970d83f51fb9bbed5440575af2a4398b4b898fb4e", provider)
-const contract = new ethers.Contract(CONTRACT_ADDRESS, Contract.abi, wallet);
-*/
-
 const HomePage: NextPage = () => {
   
 
@@ -39,9 +32,11 @@ const HomePage: NextPage = () => {
   return (
     <SideMenu
       children={
-        <main className="relative">
+        <main className="relative min-h-[86svh]">
           <Box marginTop={10}>
-            <h1>Recent Prescriptions Issued</h1>
+            <h1 className="text-lg">
+              Recent Prescriptions Issued
+            </h1>
             <TableContainer sx={{ maxHeight: 400 }} component={Paper}>
               <Table>
                 <TableHead>
