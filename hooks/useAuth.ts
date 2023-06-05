@@ -1,5 +1,7 @@
+import { currentUserAtom } from "@/jotai";
 import { Web3Auth } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 
 export default function useAuth() {
@@ -8,6 +10,9 @@ export default function useAuth() {
   const openLoginAdapter = new OpenloginAdapter({
     loginSettings: {}
   })
+
+  const setCurrentUser = useSetAtom(currentUserAtom);
+
   useEffect(() => {
     const web3auth = new Web3Auth({
       clientId: "BMK3-CWe3JcsuTf1Ccd7zr92HclDVqiabiS1_h54Chlosle0GN6lMOvmLsTL_EKzXI0kfrAIHLuESjTU-zHfywY", // Get your Client ID from Web3Auth Dashboard
@@ -21,10 +26,13 @@ export default function useAuth() {
 
   async function handleLogin() {
     await web3auth!.initModal();
-    const result = await web3auth!.connect();
+    await web3auth!.connect();
     const user = await web3auth!.getUserInfo();
     console.log(user)
-    return result;
+    return {
+      email: user.email,
+      profileUrl: user.profileImage
+    };
   }
     
   return { handleLogin };

@@ -1,49 +1,63 @@
 import { Users } from "@/mock/users";
 import { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import Contract from "@/hardhat/artifacts/contracts/DrugPrescriptionMonitoringSystem.sol/DrugPrescriptionMonitoringSystem.json";
-import { PatientStore, PatientData, MutationResult } from "@/types";
-
-const ADDRESS_FROM_REMIX = "0xd9145CCE52D386f254917e481eB44e9943F39138";
-const oldaddress = "0x81Cb982DFAf5E62145C385E326000549AB05614A"
-const contractAddress = process.env.CONTRACT_ADDRESS!;
-const provider = new ethers.EtherscanProvider("sepolia", "HXHC8CZC3NV6TIXW6FTJD9MRFSSPZ7DT43");
-const wallet = new ethers.Wallet("8d329f4186655cc0867acbe970d83f51fb9bbed5440575af2a4398b4b898fb4e", provider)
-
-const contract = new ethers.Contract("0x646D0a49C30F6051AD45d5fCD3D18abECe17128a", Contract.abi, wallet);
-
-
-
-
+import { PatientStore, PatientData, MutationResult, Drug } from "@/types";
+import useContract from "./useContract";
 
 
 export default function usePatients() {
     const [patients, setPatients] = useState<PatientStore[]>()
     const [addPatientMutationLoading, setMutationLoading] = useState<boolean>(false);
-
+    const contract = useContract();
+    
     const getPatient = async (userId:number) => {
-        const patient = await contract.patients(userId)
+        const data = await contract.patients(userId)
+        const patient: Partial<PatientData> = {
+            id: data[0],
+            name: data[1],
+            nin: data[2],
+            gender: data[3],
+            phone_number: data[4],
+            date_of_birth: data[5],
+            prescription_count: data[6],
+        }
         return patient;
+    }
+
+    const getPatientPrescriptions = async (userId:number) => {
+        const prescriptionIds = await contract.GetPatientPrescriptions(userId) as any[];
+        const data = await Promise.all(prescriptionIds.map(async(id) => await contract.prescriptions(id)))
+        const prescriptions = data.map((value) => ({
+            issued_by: value[1],
+            method_of_payment: value[2],
+            date_issued: value[3],
+        } as PrescriptionData))
+        return prescriptions
     }
 
     const getAllPatients = async () => {
         let allPatients:PatientStore[] = [];
         const patientCount = await contract.patientCount();
 
+        if (patientCount < 1) return setPatients(allPatients);
+
         for(let i = 0; i < patientCount; i++) {
             const patient = await contract.patientStore(i);
-            allPatients.push({ id: patient[0], name: patient[1] });
+            allPatients.push({ 
+                id: patient[0], 
+                name: patient[1],
+                nin: patient[2], 
+            });
         }
 
-        console.log(allPatients);
         return setPatients(allPatients);
     }
+    
     useEffect(() => {
         getAllPatients()
     }, []);
 
-    function searchUser(query:string) {
-        return patients!.filter((user) => user.name.toLowerCase().includes(query.toLowerCase()))
+    function searchUserByNin(query:string) {
+        return patients!.filter((user) => user.nin.toLowerCase().includes(query.toLowerCase()))
     }
 
     async function addPatientToBlockchain(data:Omit<PatientData, "id">): Promise<MutationResult> {
@@ -64,11 +78,26 @@ export default function usePatients() {
         }
     }
 
+    interface PrescriptionData {
+        user_id: number;
+        method_of_payment: "cash"|"card";
+        issued_by: number;
+        date_issued: number;
+        prescription_drugs: Drug[]
+    }
+
+    async function addPrescription(data: PrescriptionData) {
+        const { user_id, method_of_payment, issued_by, prescription_drugs} = data;
+        
+
+    }
+
     return { 
         Users, 
-        searchUser, 
+        searchUserByNin, 
         addPatientToBlockchain,
         getPatient,
+        getPatientPrescriptions,
         addPatientMutationLoading
     }
 }

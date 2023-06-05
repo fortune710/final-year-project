@@ -1,15 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ethers } from "ethers";
 import Contract from "@/hardhat/artifacts/contracts/DrugPrescriptionMonitoringSystem.sol/DrugPrescriptionMonitoringSystem.json";
-import { MutationResult, Presciber, PrescriberStore } from "@/types";
+import { MutationResult, Prescriber, PrescriberStore } from "@/types";
 import { useEffect, useState } from "react";
-const provider = new ethers.EtherscanProvider("sepolia", "HXHC8CZC3NV6TIXW6FTJD9MRFSSPZ7DT43");
-const wallet = new ethers.Wallet("8d329f4186655cc0867acbe970d83f51fb9bbed5440575af2a4398b4b898fb4e", provider)
-
-const contract = new ethers.Contract("0x646D0a49C30F6051AD45d5fCD3D18abECe17128a", Contract.abi, wallet);
+import useContract from "./useContract";
 
 export default function usePrescribers() {
     const queryClient = useQueryClient();
+    const contract = useContract();
 
     const [prescribers, setPrescribers] = useState<PrescriberStore[]>();
 
@@ -36,12 +34,11 @@ export default function usePrescribers() {
     const { isLoading, data: prescribers, error } = useQuery(["prescribers"], async () => {
     })*/
 
-    async function addPrescriberToBlockchain(data:Omit<Presciber, "id"|"verified"|"delegates">):Promise<MutationResult> {
+    async function addPrescriberToBlockchain(data:Omit<Prescriber, "id"|"verified"|"delegates"|"issued_prescriptions"|"is_delegate"|"issued_prescriptions_count"|"delegate_count">):Promise<MutationResult> {
         try {
-            const { home_address, name, email, profile_pic, gender, license_expiry } = data;
+            const { home_address, name, email, profile_pic, gender, license_expiry, pharmacy_id } = data;
             const newPrescriberId = prescribers!.length;
-    
-            const transaction = await contract.AddPrescriber(newPrescriberId, name, email, gender, profile_pic, home_address, license_expiry);
+            const transaction = await contract.AddPrescriber(newPrescriberId, name, email, gender, profile_pic, home_address, license_expiry, String(pharmacy_id));
             await transaction.wait();
             //queryClient.invalidateQueries(["prescribers"]);
     
