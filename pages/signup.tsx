@@ -22,6 +22,7 @@ const SignUpPage: NextPage = () => {
             license_expiry: new Date(licenseExpiry).valueOf(),
             gender: formData.gender as Gender,
             profile_pic: formData.profile_pic as string,
+            pharmacy_id: 0,         
         })
         alert(response);
     }
