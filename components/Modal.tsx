@@ -1,7 +1,9 @@
 import { Box, Modal as MUIBackdrop, SxProps } from "@mui/material";
 import React from "react";
 
-interface ModalProps extends React.ComponentProps<typeof MUIBackdrop> {}
+interface ModalProps extends React.ComponentProps<typeof MUIBackdrop> {
+    className?: string;
+}
 
 const FlexCenter: SxProps = {
     display: "flex",
@@ -27,10 +29,10 @@ const BackdropStyle: SxProps = {
     bottom: 0,
 }
 
-const Modal: React.FC<ModalProps> = ({ children, ...restProps }) => {
+const Modal: React.FC<ModalProps> = ({ children, className, ...restProps }) => {
     return(
         <MUIBackdrop sx={BackdropStyle} {...restProps}>
-            <Box sx={ModalStyle}>
+            <Box className={className} sx={ModalStyle}>
                 { children }
             </Box>
         </MUIBackdrop>

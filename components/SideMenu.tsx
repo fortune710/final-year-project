@@ -1,4 +1,4 @@
-import { 
+import {    
     Drawer, 
     Container, 
     List, 
@@ -50,8 +50,7 @@ const drawerWidth = 300;
 
 
 const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
-    const theme = useTheme();
-    const { searchUser, addPatientToBlockchain, addPatientMutationLoading } = usePatients();
+    const { searchUserByNin, addPatientToBlockchain, addPatientMutationLoading } = usePatients();
 
     const [patients, setPatients] = useState<any[]|undefined>(undefined);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -62,7 +61,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
             return setPatients(undefined);
         }
 
-        const patients = searchUser(query);
+        const patients = searchUserByNin(query);
         return setPatients(patients!);
     }
 
@@ -80,6 +79,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
         } as PatientData)
 
         alert(res)
+        if(res === "success") {
+            setModalOpen(false);
+        }
     }
 
     //Style objects for MUI components
@@ -90,7 +92,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
     }
 
     return(
-        <main className='grid grid-cols-[300px_auto]'>
+        <main className='grid grid-cols-[300px_auto] bg-white dark:bg-gray-800'>
             <Drawer
                 sx={{ 
                     width: drawerWidth,
@@ -189,9 +191,10 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                                                 LinkComponent={Link}
                                                 href={`/patients/${patient.id}`}
                                             >
-                                                <ListItemText>
-                                                    {patient.name}
-                                                </ListItemText>
+                                                <ListItemText
+                                                    primary={patient.name}
+                                                    secondary={patient.nin}
+                                                />
                                             </ListItemButton>
                                         ))
                                     }
@@ -203,7 +206,11 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                 </AppBar>
 
                 {children}
-                <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+                <Modal 
+                    className='bg-white dark:bg-gray-800' 
+                    open={modalOpen} 
+                    onClose={() => setModalOpen(false)}
+                >
                     <form onSubmit={handleSubmit} style={{ width: '80%', display: 'flex', flexDirection: 'column' }}>
                         <TextField
                             margin="normal"
@@ -254,20 +261,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                             </RadioGroup>
                         </Container>
                         
-                        <Button 
+                        <button 
                             disabled={addPatientMutationLoading} 
                             type='submit'
-                            variant='contained'
-                            disableElevation
-                            color="primary"
-                            
+                            className='bg-blue-500 rounded-lg py-3 px-7'                            
                         >
                             { 
                                 addPatientMutationLoading ? 
                                 <CircularProgress sx={{ color: "#fff" }}/> 
                                 : 'Add Patient'
                             }
-                        </Button>
+                        </button>
                     </form>
                 </Modal>
             </Container>
