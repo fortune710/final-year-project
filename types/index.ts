@@ -20,6 +20,7 @@ export interface PrescriberStore {
     id: string|number;
     name: string;
     email: string;
+    verified: boolean;
 }
 
 export interface Prescriber extends PrescriberStore {
@@ -48,6 +49,9 @@ export interface Drug {
 export interface Prescription {
     id: string|number;
     issued_by: number;
+    method_of_payment: string;
+    date_issued: number;
+    drug: Drug[];
     //method
 }
 

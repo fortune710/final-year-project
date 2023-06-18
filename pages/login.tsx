@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { currentUserAtom } from "@/jotai";
 import { useSetAtom } from "jotai";
 import useContract from "@/hooks/useContract";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const LoginPage: NextPage = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +13,7 @@ const LoginPage: NextPage = () => {
     const router = useRouter();
     const setCurrentUser = useSetAtom(currentUserAtom);
     const contract = useContract();
+
     
     async function getAllPrescriptions(prescriptionCount:number) {
         ///
@@ -26,10 +27,6 @@ const LoginPage: NextPage = () => {
             const { email } = await handleLogin();
             const response = await contract.GetPrescriberByEmail(email);
             
-            const numberOfPrescriptionsMade = response[13];
-            const numberOfDelegates = response[10];
-
-            console.log(response, response[10]);
     
             await setCurrentUser({
                 id: response[0],
@@ -64,9 +61,9 @@ const LoginPage: NextPage = () => {
             <button 
                 disabled={isLoading}
                 onClick={loginUser}
-                className="flex items-center justify-center bg-blue-600 px-6 py-2 rounded-lg"
+                className="flex items-center justify-center text-white bg-blue-600 px-6 py-2 rounded-lg"
             >
-                { isLoading ? <CircularProgress sx={{color:'#fff'}}/> : "Login"}
+                { isLoading ? <CircularProgress size={25} sx={{color:'#fff'}}/> : "Login"}
             </button>
         </Box>
     )

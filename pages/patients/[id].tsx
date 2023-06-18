@@ -44,6 +44,9 @@ const PatientDataPage: NextPage = () => {
     const contract = useContract();
     const currentUser = useAtomValue(currentUserAtom);
 
+    const [addPrescriptionLoading, setLoading] = useState(false);
+    const [addPrescriptionError, setError] = useState<boolean>(false);
+
     const { isLoading, data, error } = useQuery(["patient", patientId], async () => {
         const [patientData, patientPrescriptions] = await Promise.all([
             await getPatient(patientId),
@@ -63,16 +66,9 @@ const PatientDataPage: NextPage = () => {
     const autocompleteOptions = allDrugs.map((drug) => ({ id: drug.id, label: drug.name, manufacturer: drug.manufacturer }))
     
     const addPrescription = async () => {
+        setLoading(true);
+        console.log(currentUser)
         const prescriptionDrugs = drugs.map((drug) => ( Number(drug.id) ));
-        //const abiCoder = new ethers.AbiCoder();
-        //const encodedDrugData = abiCoder.encode(['Drug[]'], prescriptionDrugs);
-        console.log(
-            patientId,
-            methodOfPayement,
-            new Date().valueOf(),
-            currentUser.id,
-            prescriptionDrugs
-        )
         try {
             const transaction = await contract.AddPrescription(
                 patientId,
@@ -84,7 +80,10 @@ const PatientDataPage: NextPage = () => {
             await transaction.wait();
             alert("success");
         } catch (e) {
+            setError(true);
             alert(e);
+        } finally {
+            setLoading(false);
         }
     }
     
@@ -135,29 +134,29 @@ const PatientDataPage: NextPage = () => {
                                         </Button>
                                     </Box>
                                     <TableContainer sx={{ maxHeight: 400 }} component={Paper}>
-                                    <Table>
-                                        <TableHead>
-                                        <TableRow className="bg-primary text-white">
-                                            <TableCell className="text-white">ID</TableCell>
-                                            <TableCell>Drug Name</TableCell>
-                                            <TableCell>Issued By</TableCell>
-                                            <TableCell>Date Issued</TableCell>
-                                        </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                        {
-                                            data?.patientPrescriptions?.map((data, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell>{index}</TableCell>
-                                                <TableCell>{data.method_of_payment}</TableCell>
-                                                <TableCell>{data.issued_by}</TableCell>
-                                                <TableCell>{data.date_issued}</TableCell>
+                                        <Table>
+                                            <TableHead>
+                                            <TableRow className="bg-primary text-white">
+                                                <TableCell className="text-white">ID</TableCell>
+                                                <TableCell>Drug Name</TableCell>
+                                                <TableCell>Issued By</TableCell>
+                                                <TableCell>Date Issued</TableCell>
                                             </TableRow>
-                            
-                                            ))
-                                        }
-                                        </TableBody>
-                                    </Table>
+                                            </TableHead>
+                                            <TableBody>
+                                            {
+                                                data?.patientPrescriptions?.map((data, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{index}</TableCell>
+                                                    <TableCell>{data.method_of_payment}</TableCell>
+                                                    <TableCell>{data.issued_by}</TableCell>
+                                                    <TableCell>{data.date_issued}</TableCell>
+                                                </TableRow>
+                                
+                                                ))
+                                            }
+                                            </TableBody>
+                                        </Table>
                                     </TableContainer>
                                 </section>
                             </TabPanel>
@@ -168,8 +167,11 @@ const PatientDataPage: NextPage = () => {
                 
                 <Modal open={modelOpen} onClose={() =>  setModal(false)}>
                     <Box width="80%" display="flex" flexDirection="column">
-                        <h1>Add a Prescription</h1>
+                        <h1 className="text-xl text-center font-medium">
+                            Add a Prescription
+                        </h1>
                         <Autocomplete
+                            sx={{ marginY: 1.5 }}
                             multiple={true}
                             options={autocompleteOptions}
                             onChange={(e, values) => setDrugs(values)}
@@ -183,7 +185,7 @@ const PatientDataPage: NextPage = () => {
                             }
                         />
 
-                        <FormControl>
+                        <FormControl sx={{ marginY: 1.5 }}>
                             <InputLabel id="method-of-payment-label">
                                 Method of Payment
                             </InputLabel>
@@ -207,9 +209,12 @@ const PatientDataPage: NextPage = () => {
                         </FormControl>
 
                         
-                        <Button onClick={addPrescription}>
-                            Add Prescription
-                        </Button>
+                        <button 
+                            className="flex items-center justify-center text-white bg-blue-600 px-6 py-2 rounded-lg"
+                            onClick={addPrescription}
+                        >
+                        { addPrescriptionLoading ? <CircularProgress size={20} sx={{color:'#fff'}}/> : "Add Prescription" }
+                        </button>
 
                     </Box>
                 </Modal>

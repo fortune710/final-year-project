@@ -22,6 +22,7 @@ import {
     FormLabel,
     Button,
     CircularProgress,
+    IconButton,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { 
@@ -34,7 +35,8 @@ import {
     Search,
     SearchOutlined,
     AddOutlined,
-    AddCircleOutline
+    AddCircleOutline,
+    MenuOpen
 } from "@mui/icons-material";
 import usePatients from '@/hooks/usePatients';
 import Link from 'next/link';
@@ -46,15 +48,18 @@ interface SideMenuProps {
     children: React.ReactNode;
 }
 
-const drawerWidth = 300;
 
 
 const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
     const { searchUserByNin, addPatientToBlockchain, addPatientMutationLoading } = usePatients();
 
+    const [sidebarFull, setSidebarFull] = useState<boolean>(false);
     const [patients, setPatients] = useState<any[]|undefined>(undefined);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [dateofBirth, setDateofBirth] = useState<string>('');
+
+    const drawerWidth = sidebarFull ? 300 : 200;
+
 
     const handleSearch = (query:string) => {
         if (!query) {
@@ -92,35 +97,76 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
     }
 
     return(
-        <main className='grid grid-cols-[300px_auto] bg-white dark:bg-gray-800'>
-            <Drawer
-                sx={{ 
-                    width: drawerWidth,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': {
-                      width: drawerWidth,
-                      boxSizing: 'border-box',
-                      background: '#333333',
-                      color: 'white'
-                    },
-                }}
-                open={true}
-                anchor='left'
-                variant='persistent'
-            >
+        <>
+        <header>
+            <AppBar>
+                <Toolbar>
+                    <IconButton 
+                        onClick={() => setSidebarFull(!sidebarFull)} 
+                        aria-label='Toggle Menu'
+                    >
+                        <MenuOpen/>
+                    </IconButton>
+                    <Box sx={{ position: 'relative', width: '40%' }}>
+                        <Paper sx={{ boxShadow: 0, padding: 1, width: '100%', display:'flex', alignItems: 'center' }}>
+                            <SearchOutlined sx={{ marginRight: '10px' }}/>
+                            <InputBase 
+                                onChange={(e) => handleSearch(e.target.value)} 
+                                placeholder="Search for a user"
+                            />
+                        </Paper>
+                        {
+                            !patients ? null :
+                            patients && patients.length === 0 ? 
+                            <Paper sx={searchResults}>
+                                <List>
+                                    <ListItemButton onClick={() => setModalOpen(true)}>
+                                        <ListItemIcon>
+                                            <AddCircleOutline/>
+                                        </ListItemIcon>
+                                        <ListItemText>
+                                            Add Patient
+                                        </ListItemText>
+                                    </ListItemButton>
+                                </List>
+                            </Paper>
+                            :<Paper sx={searchResults}>
+                                <List>
+                                {
+                                    patients.map((patient) => (
+                                        <ListItemButton 
+                                            key={patient.id}
+                                            LinkComponent={Link}
+                                            href={`/patients/${patient.id}`}
+                                        >
+                                            <ListItemText
+                                                primary={patient.name}
+                                                secondary={patient.nin}
+                                            />
+                                        </ListItemButton>
+                                    ))
+                                }
+                                </List>
+                            </Paper>
+                        }
+                    </Box>
+                </Toolbar>
+            </AppBar>
+        </header>
+
+        <main className={`flex bg-white dark:bg-gray-800`}>
+            <aside className={`w-[${drawerWidth}px]`}>
                 <Toolbar>
                     <h1>Drug Prescription</h1>
                 </Toolbar>
                 <Divider/>
                 <List>
                     <ListItem>
-                        <ListItemButton LinkComponent={Link} href='/'>
+                        <ListItemButton LinkComponent={Link} href='/prescriptions'>
                             <ListItemIcon>
-                                <HomeOutlined/>
+                                <PeopleOutlineOutlined/>
                             </ListItemIcon>
-                            <ListItemText>
-                                Home
-                            </ListItemText>
+                            <ListItemText>Prescriptions</ListItemText>
                         </ListItemButton>
                     </ListItem>
 
@@ -130,9 +176,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                                 <MedicationOutlined/>
                             </ListItemIcon>
                             
-                            <ListItemText>
-                                Drugs
-                            </ListItemText>
+                            <ListItemText>Drugs</ListItemText>
                         </ListItemButton>
                     </ListItem>
 
@@ -142,9 +186,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                                 <PeopleOutlineOutlined/>
                             </ListItemIcon>
                             
-                            <ListItemText>
-                                My Delegates
-                            </ListItemText>
+                            <ListItemText>My Delegates</ListItemText>
                         </ListItemButton>
                     </ListItem>
 
@@ -152,58 +194,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                     
                 </List>
 
-            </Drawer>
+            </aside>
             <Container sx={{ position: 'relative' }}>
-                <AppBar 
-                    sx={{ left: 0, right: 0 }} 
-                    position="absolute"
-                >
-                    <Toolbar>
-                        <Box sx={{ position: 'relative', width: '40%' }}>
-                            <Paper sx={{ boxShadow: 0, padding: 1, width: '100%', display:'flex', alignItems: 'center' }}>
-                                <SearchOutlined sx={{ marginRight: '10px' }}/>
-                                <InputBase 
-                                    onChange={(e) => handleSearch(e.target.value)} 
-                                    placeholder="Search for a user"
-                                />
-                            </Paper>
-                            {
-                                !patients ? null :
-                                patients && patients.length === 0 ? 
-                                <Paper sx={searchResults}>
-                                    <List>
-                                        <ListItemButton onClick={() => setModalOpen(true)}>
-                                            <ListItemIcon>
-                                                <AddCircleOutline/>
-                                            </ListItemIcon>
-                                            <ListItemText>
-                                                Add Patient
-                                            </ListItemText>
-                                        </ListItemButton>
-                                    </List>
-                                </Paper>
-                                :<Paper sx={searchResults}>
-                                    <List>
-                                    {
-                                        patients.map((patient) => (
-                                            <ListItemButton 
-                                                key={patient.id}
-                                                LinkComponent={Link}
-                                                href={`/patients/${patient.id}`}
-                                            >
-                                                <ListItemText
-                                                    primary={patient.name}
-                                                    secondary={patient.nin}
-                                                />
-                                            </ListItemButton>
-                                        ))
-                                    }
-                                    </List>
-                                </Paper>
-                            }
-                        </Box>
-                    </Toolbar>
-                </AppBar>
+                
 
                 {children}
                 <Modal 
@@ -276,6 +269,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
                 </Modal>
             </Container>
         </main>
+        </>
     )
 }
 

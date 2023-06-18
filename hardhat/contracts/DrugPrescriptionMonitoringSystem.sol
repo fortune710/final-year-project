@@ -254,6 +254,11 @@ contract DrugPrescriptionMonitoringSystem {
         prescriberStore[id].verified = true;
     }
 
+     function SuspendPrescriber (uint id) public {
+        prescribers[id].verified = false;
+        prescriberStore[id].verified = false;
+    }
+
     /*
     function GetUnverifiedPrescribers () public view {
         uint unverified_prescriber_count = 0;
@@ -375,5 +380,8 @@ contract DrugPrescriptionMonitoringSystem {
         return prescribers[prescriber_id].delegates;
     }
 
+    function GetPrescriptionDrugs(uint prescription_id) public view returns (uint[] memory) {
+        return prescriptions[prescription_id].drug_ids;
+    }
 
 }

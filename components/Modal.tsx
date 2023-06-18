@@ -13,11 +13,9 @@ const FlexCenter: SxProps = {
 
 const ModalStyle: SxProps = {
     ...FlexCenter,
-    backgroundColor: "#232323",
-    color: "#fff",
     maxWidth: "70%",
     minWidth: "55%",
-    padding: 4
+    padding: 4,
 }
 
 const BackdropStyle: SxProps = {
@@ -32,7 +30,7 @@ const BackdropStyle: SxProps = {
 const Modal: React.FC<ModalProps> = ({ children, className, ...restProps }) => {
     return(
         <MUIBackdrop sx={BackdropStyle} {...restProps}>
-            <Box className={className} sx={ModalStyle}>
+            <Box className={`text-black bg-white dark:text-white dark:bg-gray-800 ${className}`} sx={ModalStyle}>
                 { children }
             </Box>
         </MUIBackdrop>

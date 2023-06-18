@@ -1,5 +1,5 @@
 import { Prescriber } from "@/types";
-import { atom } from "jotai";
+import { atom } from "jotai"
 
 export const currentUserAtom = atom<Prescriber>({
     id: 0,
@@ -14,4 +14,7 @@ export const currentUserAtom = atom<Prescriber>({
     delegates: [],
     issued_prescriptions: [],
     
+    is_delegate: false,
+    delegate_count: 0,
+    issued_prescriptions_count: 0,
 })
